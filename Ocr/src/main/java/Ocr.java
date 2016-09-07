@@ -4,7 +4,7 @@ import java.util.List;
 public class Ocr {
     public static final int SINGLE_RAW_NUMBER_HEIGHT = 4;
     public static final int SINGLE_RAW_NUMBER_WIDTH = 3;
-    List<String> numberDictionary = new ArrayList<>();
+    private List<String> numberDictionary = new ArrayList<>();
 
     public Ocr() {
         numberDictionary.add("" +

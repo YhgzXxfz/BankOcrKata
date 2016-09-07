@@ -6,7 +6,7 @@ import org.junit.runner.RunWith;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(DataProviderRunner.class)
-public class BankOcrTest {
+public class OcrTest {
 
     @DataProvider(value = {
             "" +
