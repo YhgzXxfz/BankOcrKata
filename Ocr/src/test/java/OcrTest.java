@@ -10,55 +10,45 @@ public class OcrTest {
 
     @DataProvider(value = {
             "" +
-                    " _ \n" +
-                    "| |\n" +
-                    "|_|\n" +
-                    "   ,0",
+                    " _ " +
+                    "| |" +
+                    "|_|,0",
             "" +
-                    "   \n" +
-                    "  |\n" +
-                    "  |\n" +
-                    "   ,1",
+                    "   " +
+                    "  |" +
+                    "  |,1",
             "" +
-                    " _ \n" +
-                    " _|\n" +
-                    "|_ \n" +
-                    "   ,2",
+                    " _ " +
+                    " _|" +
+                    "|_ ,2",
             "" +
-                    " _ \n" +
-                    " _|\n" +
-                    " _|\n" +
-                    "   ,3",
+                    " _ " +
+                    " _|" +
+                    " _|,3",
             "" +
-                    "   \n" +
-                    "|_|\n" +
-                    "  |\n" +
-                    "   ,4",
+                    "   " +
+                    "|_|" +
+                    "  |,4",
             "" +
-                    " _ \n" +
-                    "|_ \n" +
-                    " _|\n" +
-                    "   ,5",
+                    " _ " +
+                    "|_ " +
+                    " _|,5",
             "" +
-                    " _ \n" +
-                    "|_ \n" +
-                    "|_|\n" +
-                    "   ,6",
+                    " _ " +
+                    "|_ " +
+                    "|_|,6",
             "" +
-                    " _ \n" +
-                    "  |\n" +
-                    "  |\n" +
-                    "   ,7",
+                    " _ " +
+                    "  |" +
+                    "  |,7",
             "" +
-                    " _ \n" +
-                    "|_|\n" +
-                    "|_|\n" +
-                    "   ,8",
+                    " _ " +
+                    "|_|" +
+                    "|_|,8",
             "" +
-                    " _ \n" +
-                    "|_|\n" +
-                    " _|\n" +
-                    "   ,9"
+                    " _ " +
+                    "|_|" +
+                    " _|,9"
     }, trimValues = false)
     @Test
     public void should_parse_single_raw_number(String rawSingleNumber, String expectedSingleNumber) {
@@ -77,10 +67,9 @@ public class OcrTest {
         // Given
         Ocr ocr = new Ocr();
         String rawAccountNumber = "" +
-                " _     _  _     _  _  _  _ \n" +
-                "|_|  | _| _||_||_ |_   ||_|\n" +
-                " _|  ||_  _|  | _||_|  ||_|\n" +
-                "                           ";
+                " _     _  _     _  _  _  _ " +
+                "|_|  | _| _||_||_ |_   ||_|" +
+                " _|  ||_  _|  | _||_|  ||_|";
 
         // When
         String accountNumber = ocr.parseRawNumbers(rawAccountNumber);
