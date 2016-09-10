@@ -2,9 +2,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Ocr {
-    private static final int SINGLE_RAW_NUMBER_HEIGHT = 3;
-    private static final int SINGLE_RAW_NUMBER_WIDTH = 3;
-    private static final int TOTAL_DIGITS_IN_ACCOUNT_NUMBER = 9;
+    public static final int SINGLE_RAW_NUMBER_HEIGHT = 3;
+    public static final int SINGLE_RAW_NUMBER_WIDTH = 3;
+    public static final int TOTAL_DIGITS_IN_ACCOUNT_NUMBER = 9;
     private List<String> numberDictionary = new ArrayList<>();
 
     public Ocr() {
@@ -59,7 +59,7 @@ public class Ocr {
         for (int i = 0; i < numberDictionary.size(); ++i) {
             if (numberDictionary.get(i).equals(singleRawNumber)) return Integer.toString(i);
         }
-        return "-1";
+        return "?";
     }
 
     public String parseRawNumbers(String rawAccountNumber) {
@@ -73,14 +73,14 @@ public class Ocr {
 
     private String[] splitRawNumberIntoLines(String rawAccountNumber) {
         String[] lines = new String[3];
-        lines[0] = rawAccountNumber.substring(0, SINGLE_RAW_NUMBER_WIDTH*TOTAL_DIGITS_IN_ACCOUNT_NUMBER);
+        lines[0] = rawAccountNumber.substring(0, SINGLE_RAW_NUMBER_WIDTH * TOTAL_DIGITS_IN_ACCOUNT_NUMBER);
         lines[1] = rawAccountNumber.substring(
-                SINGLE_RAW_NUMBER_WIDTH*TOTAL_DIGITS_IN_ACCOUNT_NUMBER,
-                2*SINGLE_RAW_NUMBER_WIDTH*TOTAL_DIGITS_IN_ACCOUNT_NUMBER
+                SINGLE_RAW_NUMBER_WIDTH * TOTAL_DIGITS_IN_ACCOUNT_NUMBER,
+                2 * SINGLE_RAW_NUMBER_WIDTH * TOTAL_DIGITS_IN_ACCOUNT_NUMBER
         );
         lines[2] = rawAccountNumber.substring(
-                2*SINGLE_RAW_NUMBER_WIDTH*TOTAL_DIGITS_IN_ACCOUNT_NUMBER,
-                3*SINGLE_RAW_NUMBER_WIDTH*TOTAL_DIGITS_IN_ACCOUNT_NUMBER
+                2 * SINGLE_RAW_NUMBER_WIDTH * TOTAL_DIGITS_IN_ACCOUNT_NUMBER,
+                3 * SINGLE_RAW_NUMBER_WIDTH * TOTAL_DIGITS_IN_ACCOUNT_NUMBER
         );
         return lines;
     }
