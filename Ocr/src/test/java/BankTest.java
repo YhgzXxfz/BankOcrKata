@@ -49,4 +49,24 @@ public class BankTest {
         // Then
         assertThat(report).isEqualTo("490867715 AMB\n457508000\n664371485");
     }
+
+    @Test
+    public void should_generate_report_with_correction_when_raw_account_numbers_are_illegal() {
+
+        // Given
+        final String rawAccountNumbers = "" +
+                " _  _        _  _  _  _  _ " +
+                "|_||_   |  || |  ||_  _||_ " +
+                "|_||_|  |  ||_|    _  _||_|" +
+                " _  _     _  _        _  _ " +
+                "|_ |_ |_| _|  |  ||_| _||_ " +
+                "|_||_|  | _|  |  |  ||_| _|";
+        Bank bank = new Bank(rawAccountNumbers);
+
+        // When
+        String report = bank.generateReportWithCorrection();
+
+        // Then
+        assertThat(report).isEqualTo("86110??36 ILL\n664371485");
+    }
 }

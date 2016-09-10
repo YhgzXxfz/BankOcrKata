@@ -5,7 +5,7 @@ public class Ocr {
     public static final int SINGLE_RAW_NUMBER_HEIGHT = 3;
     public static final int SINGLE_RAW_NUMBER_WIDTH = 3;
     public static final int TOTAL_DIGITS_IN_ACCOUNT_NUMBER = 9;
-    private List<String> numberDictionary = new ArrayList<>();
+    public static final List<String> numberDictionary = new ArrayList<>();
 
     public Ocr() {
         setUpNumberTemplate();
@@ -63,10 +63,9 @@ public class Ocr {
     }
 
     public String parseRawNumbers(String rawAccountNumber) {
-        String[] lines = splitRawNumberIntoLines(rawAccountNumber);
         StringBuilder accountNumber = new StringBuilder();
-        while (!lines[0].isEmpty()) {
-            accountNumber.append(parseSingleRawNumber(extractSingleRawNumber(lines)));
+        for (int i = 0; i < TOTAL_DIGITS_IN_ACCOUNT_NUMBER; ++i) {
+            accountNumber.append(parseSingleRawNumber(extractSingleRawNumber(rawAccountNumber, i)));
         }
         return accountNumber.toString();
     }
@@ -85,12 +84,24 @@ public class Ocr {
         return lines;
     }
 
-    private String extractSingleRawNumber(String[] lines) {
+    public String extractSingleRawNumber(String rawAccountNumber, int i) {
+        String[] lines = splitRawNumberIntoLines(rawAccountNumber);
         StringBuilder singleRawNumber = new StringBuilder();
-        for (int i = 0; i < SINGLE_RAW_NUMBER_HEIGHT; ++i) {
-            singleRawNumber.append(lines[i].substring(0, SINGLE_RAW_NUMBER_WIDTH));
-            lines[i] = lines[i].substring(SINGLE_RAW_NUMBER_WIDTH);
+
+        for (int j = 0; j < SINGLE_RAW_NUMBER_HEIGHT; ++j) {
+            singleRawNumber.append(lines[j].substring(i * SINGLE_RAW_NUMBER_WIDTH, (i + 1) * SINGLE_RAW_NUMBER_WIDTH));
         }
+
         return singleRawNumber.toString();
+    }
+
+    public List<String> splitRawNumberIntoSingleRawNumbers(String rawAccountNumber) {
+        List<String> singleRawNumberList = new ArrayList<>();
+
+        for (int i = 0; i < TOTAL_DIGITS_IN_ACCOUNT_NUMBER; ++i) {
+            singleRawNumberList.add(extractSingleRawNumber(rawAccountNumber, i));
+        }
+
+        return singleRawNumberList;
     }
 }

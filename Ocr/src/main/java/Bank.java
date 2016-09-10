@@ -1,3 +1,5 @@
+import org.apache.commons.lang3.StringUtils;
+
 import java.util.*;
 
 public class Bank {
@@ -5,24 +7,12 @@ public class Bank {
     private final Account account;
     private final Ocr ocr;
     private final String originalRawAccountNumbers;
-    private Map<Character, List<Character>> mp = new HashMap<>();
+    private Map<String, Set<Character>> possibleCorrectionRepository = new HashMap<>();
 
     public Bank(String originalRawAccountNumbers) {
         this.originalRawAccountNumbers = originalRawAccountNumbers;
         this.ocr = new Ocr();
         this.account = new Account();
-
-        mp.put('0', Arrays.asList('8'));
-        mp.put('1', Arrays.asList('7'));
-        mp.put('2', Arrays.asList('2'));
-        mp.put('3', Arrays.asList('3'));
-        mp.put('4', Arrays.asList('4'));
-        mp.put('5', Arrays.asList('6', '9'));
-        mp.put('6', Arrays.asList('5', '8'));
-        mp.put('7', Arrays.asList('1'));
-        mp.put('8', Arrays.asList('0', '6', '9'));
-        mp.put('9', Arrays.asList('5', '8'));
-
     }
 
     public String generateReport() {
@@ -67,8 +57,19 @@ public class Bank {
 
         if (account.isValid()) {
             report.append(accountNumber);
+        } else if (notCorrectable(accountNumber)) {
+            report.append(accountNumber).append(" ILL");
+        } else if (isIllegal(accountNumber)) {
+            List<String> corrections = guessPosibleCorrectionsForIllegalAccountNumber(rawAccountNumber);
+            if (corrections.isEmpty()) {
+                report.append(accountNumber).append(" ILL");
+            } else {
+                report.append(corrections.get(0));
+                if (corrections.size() > 1) report.append(" AMB");
+            }
+
         } else {
-            List<String> corrections = guessPossibleCorrections(accountNumber);
+            List<String> corrections = guessPossibleCorrectionsForInvalidAccountNumber(rawAccountNumber);
             if (corrections.isEmpty()) {
                 report.append(accountNumber).append(" ERR");
             } else {
@@ -76,15 +77,53 @@ public class Bank {
                 if (corrections.size() > 1) report.append(" AMB");
             }
         }
+
         report.append('\n');
     }
 
-    private List<String> guessPossibleCorrections(String accountNumber) {
+    private List<String> guessPosibleCorrectionsForIllegalAccountNumber(String rawAccountNumber) {
+        String accountNumber = ocr.parseRawNumbers(rawAccountNumber);
         List<String> corrections = new ArrayList<>();
         char[] chars = accountNumber.toCharArray();
+        int index = accountNumber.indexOf("?");
+        String singleRawNumber = ocr.extractSingleRawNumber(rawAccountNumber, index);
+
+        final char temp = chars[index];
+        Set<Character> possibleSingleNumbers = generatePossibleSingleNumbers(singleRawNumber);
+        for (char digit : possibleSingleNumbers) {
+            chars[index] = digit;
+            String correctedAccountNumber = new String(chars);
+            account.setAccountNumber(correctedAccountNumber);
+            if (account.isValid()) {
+                corrections.add(correctedAccountNumber);
+            }
+        }
+        chars[index] = temp;
+
+        return corrections;
+    }
+
+    private boolean isIllegal(String accountNumber) {
+        return accountNumber.contains("?");
+    }
+
+    private boolean notCorrectable(String accountNumber) {
+        return StringUtils.countMatches(accountNumber, "?") > 1;
+    }
+
+    private List<String> guessPossibleCorrectionsForInvalidAccountNumber(String rawAccountNumber) {
+        String accountNumber = ocr.parseRawNumbers(rawAccountNumber);
+        List<String> corrections = new ArrayList<>();
+        char[] chars = accountNumber.toCharArray();
+        List<String> singleRawNumbers = ocr.splitRawNumberIntoSingleRawNumbers(rawAccountNumber);
+
         for (int i = 0; i < Ocr.TOTAL_DIGITS_IN_ACCOUNT_NUMBER; ++i) {
+
             final char temp = chars[i];
-            for (char digit : mp.get(temp)) {
+            String singleRawNumber = singleRawNumbers.get(i);
+            Set<Character> possibleSingleNumbers = generatePossibleSingleNumbers(singleRawNumber);
+
+            for (char digit : possibleSingleNumbers) {
                 chars[i] = digit;
                 String correctedAccountNumber = new String(chars);
                 account.setAccountNumber(correctedAccountNumber);
@@ -95,5 +134,44 @@ public class Bank {
             chars[i] = temp;
         }
         return corrections;
+    }
+
+    private Set<Character> generatePossibleSingleNumbers(String singleRawNumber) {
+        if (possibleCorrectionRepository.containsKey(singleRawNumber))
+            return possibleCorrectionRepository.get(singleRawNumber);
+
+        List<String> possibleSingleRawNumbers = guessPossibleSingleRawNumbers(singleRawNumber);
+        Set<Character> possibleSingleNumbers = new HashSet<>();
+        for (String possibleSingleRawNumber : possibleSingleRawNumbers) {
+            char possibleSingleNumber = ocr.parseSingleRawNumber(possibleSingleRawNumber).charAt(0);
+            if (possibleSingleNumber != '?') {
+                possibleSingleNumbers.add(possibleSingleNumber);
+            }
+        }
+        possibleCorrectionRepository.putIfAbsent(singleRawNumber, possibleSingleNumbers);
+
+        return possibleCorrectionRepository.get(singleRawNumber);
+    }
+
+    private List<String> guessPossibleSingleRawNumbers(String singleRawNumber) {
+        List<String> possibleSingleRawNumbers = new ArrayList<>();
+
+        char[] chars = singleRawNumber.toCharArray();
+        for (int i = 0; i < singleRawNumber.length(); ++i) {
+            final char temp = chars[i];
+            chars[i] = isUnderscoreOrPipe(temp) ? ' ' : canOnlySetUnderscore(i) ? '_' : '|';
+            possibleSingleRawNumbers.add(new String(chars));
+            chars[i] = temp;
+        }
+        return possibleSingleRawNumbers;
+
+    }
+
+    private boolean isUnderscoreOrPipe(char temp) {
+        return (temp == '_' || temp == '|');
+    }
+
+    private boolean canOnlySetUnderscore(int i) {
+        return i % Ocr.SINGLE_RAW_NUMBER_WIDTH == 1;
     }
 }
